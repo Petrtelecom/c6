@@ -60,8 +60,8 @@
             overflow: hidden;
         }
 
-        /* Контейнер для снежинок */
-        .snowflakes {
+        /* Контейнер для падающих элементов */
+        .falling-items {
             position: fixed;
             top: 0;
             left: 0;
@@ -71,26 +71,32 @@
             z-index: 1;
         }
 
-        .snowflake {
+        .falling-item {
             position: absolute;
-            color: #fff;
             font-size: 1.5em;
             font-family: Arial, sans-serif;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
-            animation: snowfall linear infinite;
-            opacity: 0.8;
+            animation: fall linear infinite;
+            opacity: 0.9;
         }
 
-        @keyframes snowfall {
+        .falling-item.light-theme {
+            text-shadow: 0 0 3px rgba(255, 200, 100, 0.6);
+        }
+
+        .falling-item.dark-theme {
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.8);
+        }
+
+        @keyframes fall {
             0% {
                 transform: translateY(-100vh) rotate(0deg);
                 opacity: 0;
             }
             10% {
-                opacity: 0.8;
+                opacity: 0.9;
             }
             90% {
-                opacity: 0.8;
+                opacity: 0.9;
             }
             100% {
                 transform: translateY(100vh) rotate(360deg);
@@ -283,7 +289,7 @@
     </style>
 </head>
 <body>
-    <div class="snowflakes" id="snowflakes"></div>
+    <div class="falling-items" id="fallingItems"></div>
     <div class="calculator">
         <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Переключить тему">
             <div class="ornament-top"></div>
@@ -337,6 +343,7 @@
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             updateThemeIcon(newTheme);
+            updateFallingItems(newTheme);
         }
 
         // Обновление иконки темы
@@ -348,34 +355,51 @@
         // Инициализация при загрузке
         initTheme();
 
-        // Создание снежинок
-        function createSnowflakes() {
-            const snowflakesContainer = document.getElementById('snowflakes');
-            const snowflakeSymbols = ['❄', '❅', '❆', '✻', '✼', '✽', '❃'];
-            const numSnowflakes = 50;
+        // Символы для разных тем
+        const lightThemeSymbols = ['🍎', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🍒', '🍑', '🥝', '🍍', '🥭', '🍬', '🍭', '🍫', '🍰', '🧁', '🍪', '🍩', '🍯'];
+        const darkThemeSymbols = ['🎄', '🎁', '🎀', '🎊', '🎉', '⭐', '✨', '🌟', '💫', '🔔', '🎈', '🎆', '🎇', '🕯️', '❄️', '☃️'];
 
-            for (let i = 0; i < numSnowflakes; i++) {
-                const snowflake = document.createElement('div');
-                snowflake.className = 'snowflake';
-                snowflake.textContent = snowflakeSymbols[Math.floor(Math.random() * snowflakeSymbols.length)];
+        // Создание падающих элементов
+        function createFallingItems(theme) {
+            const container = document.getElementById('fallingItems');
+            container.innerHTML = ''; // Очищаем контейнер
+            
+            const symbols = theme === 'dark' ? darkThemeSymbols : lightThemeSymbols;
+            const numItems = 50;
+            const themeClass = theme === 'dark' ? 'dark-theme' : 'light-theme';
+
+            for (let i = 0; i < numItems; i++) {
+                const item = document.createElement('div');
+                item.className = 'falling-item ' + themeClass;
+                item.textContent = symbols[Math.floor(Math.random() * symbols.length)];
                 
                 const startLeft = Math.random() * 100;
                 const animationDuration = Math.random() * 3 + 2; // 2-5 секунд
                 const animationDelay = Math.random() * 5;
                 const size = Math.random() * 0.5 + 0.5; // 0.5-1em
                 
-                snowflake.style.left = startLeft + '%';
-                snowflake.style.animationDuration = animationDuration + 's';
-                snowflake.style.animationDelay = animationDelay + 's';
-                snowflake.style.fontSize = size + 'em';
-                snowflake.style.opacity = Math.random() * 0.5 + 0.5; // 0.5-1
+                item.style.left = startLeft + '%';
+                item.style.animationDuration = animationDuration + 's';
+                item.style.animationDelay = animationDelay + 's';
+                item.style.fontSize = size + 'em';
+                item.style.opacity = Math.random() * 0.4 + 0.6; // 0.6-1
                 
-                snowflakesContainer.appendChild(snowflake);
+                container.appendChild(item);
             }
         }
 
-        // Запуск создания снежинок
-        createSnowflakes();
+        // Обновление падающих элементов при смене темы
+        function updateFallingItems(theme) {
+            createFallingItems(theme);
+        }
+
+        // Запуск создания элементов при загрузке
+        function initFallingItems() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            createFallingItems(currentTheme);
+        }
+
+        initFallingItems();
 
         function updateDisplay() {
             display.textContent = currentInput;
